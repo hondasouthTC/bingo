@@ -1,0 +1,605 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#12332E">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="賓果對獎">
+<title>賓果對獎</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{
+  --felt:#12332E; --felt-hi:#17423B; --felt-lo:#0A2421;
+  --card:#F4F1E8; --card-2:#EBE7DC; --card-3:#E1DCCE;
+  --ink:#16221F; --ink-2:#4A5651; --ink-3:#8B948E;
+  --daub:#E8452C; --daub-dk:#B92F1B;
+  --gold:#F2B705; --gold-dk:#C99400;
+  --line:rgba(22,34,31,.14);
+  --r:14px;
+}
+html,body{margin:0;padding:0;height:100%}
+body{
+  background:radial-gradient(130% 90% at 50% -10%, var(--felt-hi) 0%, var(--felt) 42%, var(--felt-lo) 100%);
+  color:var(--card); font-family:-apple-system,BlinkMacSystemFont,"PingFang TC","Noto Sans TC","Microsoft JhengHei",system-ui,sans-serif;
+  -webkit-font-smoothing:antialiased; font-size:15px; line-height:1.5;
+  min-height:100vh; min-height:100dvh;
+  padding:calc(14px + env(safe-area-inset-top)) 16px calc(18px + env(safe-area-inset-bottom));
+}
+body::before{
+  content:''; position:fixed; inset:0; pointer-events:none; z-index:0;
+  background-image:radial-gradient(rgba(255,255,255,.045) .8px, transparent .8px);
+  background-size:3px 3px; opacity:.55;
+}
+button,input{font-family:inherit}
+button{cursor:pointer}
+.screen{position:relative;z-index:1;max-width:430px;margin:0 auto;display:none}
+.screen.on{display:block}
+
+/* ---------- shared type ---------- */
+.eyebrow{font-size:10px;font-weight:800;letter-spacing:.26em;color:rgba(244,241,232,.5);margin:0 0 10px}
+.h1{font-size:38px;line-height:1.06;font-weight:800;letter-spacing:-.02em;margin:0 0 12px;color:#fff}
+.lede{font-size:13.5px;line-height:1.75;color:rgba(244,241,232,.72);margin:0}
+.num{font-variant-numeric:tabular-nums;font-feature-settings:"tnum" 1}
+
+/* ---------- intro ---------- */
+.intro{padding-top:8vh}
+.ticket-mini{
+  display:inline-flex;align-items:center;gap:7px;background:rgba(244,241,232,.09);
+  border:1px solid rgba(244,241,232,.16);border-radius:999px;padding:5px 11px 5px 7px;
+  font-size:10.5px;font-weight:800;letter-spacing:.16em;color:rgba(244,241,232,.62);margin-bottom:22px;
+}
+.ticket-mini i{width:7px;height:7px;border-radius:50%;background:var(--daub);display:block}
+.intro h1.h1 span{color:var(--gold)}
+.field{margin:26px 0 0}
+.field label{display:block;font-size:10.5px;font-weight:800;letter-spacing:.16em;color:rgba(244,241,232,.5);margin-bottom:8px}
+.field input{
+  width:100%;height:56px;border-radius:var(--r);padding:0 16px;font-size:19px;font-weight:700;letter-spacing:.01em;
+  background:rgba(244,241,232,.07);border:1.5px solid rgba(244,241,232,.18);color:#fff;
+}
+.field input::placeholder{color:rgba(244,241,232,.28);font-weight:600}
+.field input:focus{outline:none;border-color:var(--gold);background:rgba(244,241,232,.11);box-shadow:0 0 0 4px rgba(242,183,5,.14)}
+.btn-main{
+  width:100%;height:56px;margin-top:14px;border:0;border-radius:var(--r);
+  background:var(--daub);color:#fff;font-size:16px;font-weight:800;letter-spacing:.06em;
+  box-shadow:0 10px 24px -12px rgba(232,69,44,.9), inset 0 1px 0 rgba(255,255,255,.22);
+  transition:transform .12s, background .15s;
+}
+.btn-main:active{transform:translateY(1px) scale(.995);background:var(--daub-dk)}
+.btn-main:focus-visible{outline:3px solid var(--gold);outline-offset:3px}
+.rules{margin:22px 0 0;padding:15px 16px;border-radius:12px;background:rgba(0,0,0,.18);border:1px solid rgba(244,241,232,.08)}
+.rules dt{font-size:10px;font-weight:800;letter-spacing:.16em;color:rgba(244,241,232,.42);margin:0 0 3px}
+.rules dd{margin:0 0 10px;font-size:12.5px;color:rgba(244,241,232,.78);line-height:1.6}
+.rules dd:last-child{margin-bottom:0}
+.rules b{color:var(--gold);font-weight:800}
+
+/* ---------- card ---------- */
+.card{
+  background:var(--card);border-radius:18px;padding:14px 14px 0;position:relative;
+  box-shadow:0 24px 44px -26px rgba(0,0,0,.9), 0 2px 0 rgba(255,255,255,.4) inset;
+  color:var(--ink);overflow:hidden;
+}
+.card::after{
+  content:'';position:absolute;inset:0;pointer-events:none;
+  background-image:radial-gradient(rgba(22,34,31,.05) .7px, transparent .7px);background-size:2.5px 2.5px;
+  opacity:.8;
+}
+.card-hd{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:0 2px 11px;position:relative;z-index:1}
+.card-hd .who{min-width:0}
+.card-hd .nick{font-size:17px;font-weight:800;letter-spacing:.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.card-hd .meta{font-size:10px;font-weight:800;letter-spacing:.14em;color:var(--ink-3);margin-top:2px}
+.stamp{
+  flex:none;font-size:9.5px;font-weight:800;letter-spacing:.14em;padding:4px 8px;border-radius:5px;
+  border:1.5px dashed var(--line);color:var(--ink-3);
+}
+.stamp.live{border:1.5px solid var(--daub);color:var(--daub);background:rgba(232,69,44,.07)}
+
+.grid{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;position:relative;z-index:1;padding-bottom:14px}
+.cell{
+  position:relative;aspect-ratio:1/1;border:1px solid var(--line);border-radius:10px;
+  background:linear-gradient(170deg, #FBFAF4, var(--card-2));
+  display:flex;align-items:center;justify-content:center;
+  font-size:clamp(16px,5.4vw,22px);font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:-.03em;
+  color:var(--ink); transition:color .16s, border-color .16s, transform .1s;
+  padding:0; overflow:hidden;
+}
+.grid.tap .cell:active{transform:scale(.94)}
+.cell .daub{
+  position:absolute;inset:9%;border-radius:46% 54% 51% 49% / 53% 46% 54% 47%;
+  background:radial-gradient(circle at 34% 30%, #FF6B4E 0%, var(--daub) 46%, var(--daub-dk) 100%);
+  transform:scale(0) rotate(-14deg);opacity:0;
+  box-shadow:inset 0 -2px 5px rgba(0,0,0,.16), inset 0 2px 4px rgba(255,255,255,.3);
+}
+.cell .v{position:relative;z-index:2;line-height:1}
+.cell.marked{color:#FFF6F1;border-color:var(--daub-dk)}
+.cell.marked .daub{animation:daubIn .34s cubic-bezier(.2,1.5,.45,1) forwards}
+@keyframes daubIn{0%{transform:scale(0) rotate(-14deg);opacity:0}60%{opacity:1}100%{transform:scale(1) rotate(-5deg);opacity:1}}
+.cell.hit{border-color:var(--gold);box-shadow:0 0 0 2px var(--gold), 0 0 14px -2px rgba(242,183,5,.7)}
+.cell.hit .v{color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.35)}
+
+/* stub */
+.stub{
+  position:relative;margin:0 -14px;padding:12px 16px 14px;background:rgba(22,34,31,.055);
+  border-top:1.5px dashed rgba(22,34,31,.22);display:flex;align-items:center;justify-content:space-between;gap:12px;
+}
+.stub::before,.stub::after{
+  content:'';position:absolute;top:-8px;width:16px;height:16px;border-radius:50%;background:var(--felt);
+}
+.stub::before{left:-8px} .stub::after{right:-8px}
+.stub .k{font-size:9.5px;font-weight:800;letter-spacing:.16em;color:var(--ink-3);display:block;margin-bottom:2px}
+.stub .v{font-size:15px;font-weight:800;letter-spacing:-.01em}
+.stub .v small{font-size:11px;font-weight:700;color:var(--ink-3);letter-spacing:0}
+.stub .right{text-align:right}
+
+/* ---------- bars ---------- */
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:13px;min-height:56px}
+.topbar .lbl{font-size:10px;font-weight:800;letter-spacing:.18em;color:rgba(244,241,232,.42);display:block;margin-bottom:2px}
+.topbar .big{font-size:15px;font-weight:800;color:#fff}
+.timer{position:relative;width:60px;height:60px;flex:none}
+.timer svg{transform:rotate(-90deg);display:block}
+.timer .bg{fill:none;stroke:rgba(244,241,232,.14);stroke-width:5}
+.timer .fg{fill:none;stroke:var(--gold);stroke-width:5;stroke-linecap:round;transition:stroke .3s}
+.timer b{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:19px;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.timer.warn .fg{stroke:var(--daub)}
+.timer.warn b{color:#FF8A70}
+
+.acts{display:flex;gap:9px;margin-top:14px}
+.btn-2{
+  flex:1;height:52px;border-radius:var(--r);border:1.5px solid rgba(244,241,232,.2);background:transparent;
+  color:rgba(244,241,232,.86);font-size:14px;font-weight:800;letter-spacing:.04em;transition:.15s;
+}
+.btn-2 small{display:block;font-size:10px;font-weight:700;letter-spacing:.1em;color:rgba(244,241,232,.4);margin-top:1px}
+.btn-2:active{background:rgba(244,241,232,.1)}
+.btn-2:disabled{opacity:.34;cursor:not-allowed}
+.btn-go{
+  flex:1.25;height:52px;border:0;border-radius:var(--r);background:var(--gold);color:#2A1F00;
+  font-size:15px;font-weight:800;letter-spacing:.05em;
+  box-shadow:0 10px 22px -12px rgba(242,183,5,.85);
+}
+.btn-go:active{transform:translateY(1px)}
+.btn-go:focus-visible,.btn-2:focus-visible{outline:3px solid #fff;outline-offset:3px}
+
+.hint{font-size:11.5px;line-height:1.65;color:rgba(244,241,232,.45);margin:12px 2px 0;text-align:center}
+.hint b{color:rgba(244,241,232,.75);font-weight:700}
+
+/* play screen additions */
+.scorebar{display:flex;gap:8px;margin-top:14px}
+.score{flex:1;background:rgba(0,0,0,.2);border:1px solid rgba(244,241,232,.09);border-radius:12px;padding:10px 12px}
+.score .k{font-size:9.5px;font-weight:800;letter-spacing:.14em;color:rgba(244,241,232,.42);display:block;margin-bottom:2px}
+.score .v{font-size:20px;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:-.02em;color:#fff}
+.score .v em{font-style:normal;font-size:11px;font-weight:700;color:rgba(244,241,232,.45);margin-left:2px}
+.score.on{border-color:rgba(242,183,5,.5);background:rgba(242,183,5,.1)}
+.score.on .v{color:var(--gold)}
+
+/* bingo flash */
+.flash{
+  position:fixed;inset:0;z-index:60;display:flex;align-items:center;justify-content:center;
+  pointer-events:none;opacity:0;
+}
+.flash.go{animation:flashIn 1.5s ease forwards}
+@keyframes flashIn{
+  0%{opacity:0;transform:scale(.6)}
+  18%{opacity:1;transform:scale(1.04)}
+  30%{transform:scale(1)}
+  78%{opacity:1}
+  100%{opacity:0}
+}
+.flash span{
+  font-size:44px;font-weight:900;letter-spacing:.06em;color:var(--gold);
+  text-shadow:0 0 28px rgba(242,183,5,.65), 0 3px 0 rgba(0,0,0,.35);
+  transform:rotate(-4deg);
+}
+.toast{
+  position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom));transform:translate(-50%,10px);
+  background:rgba(10,25,22,.95);border:1px solid rgba(244,241,232,.14);color:#fff;
+  font-size:12.5px;font-weight:700;padding:10px 16px;border-radius:10px;z-index:70;
+  opacity:0;pointer-events:none;transition:.2s;max-width:86vw;text-align:center;
+}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+.verchip{
+  position:fixed;left:50%;transform:translateX(-50%);bottom:calc(6px + env(safe-area-inset-bottom));
+  background:none;border:0;color:rgba(244,241,232,.24);font-size:9.5px;font-weight:700;letter-spacing:.12em;
+  padding:6px;z-index:5;
+}
+@media (prefers-reduced-motion: reduce){
+  *{animation-duration:.001s!important;transition-duration:.001s!important}
+}
+@media (max-height:700px){
+  .intro{padding-top:3vh}
+  .h1{font-size:32px}
+  .rules{margin-top:16px}
+}
+</style>
+</head>
+<body>
+
+<!-- ============ 入場 ============ -->
+<section class="screen on" id="scIntro">
+  <div class="intro">
+    <span class="ticket-mini"><i></i>BINGO CHECK CARD</span>
+    <h1 class="h1">賓果<span>對獎</span></h1>
+    <p class="lede">主持人直播報號，你只要在自己的卡上點號碼。<br>連成一條線，就是賓果。</p>
+
+    <div class="field">
+      <label for="nick">你的暱稱</label>
+      <input id="nick" placeholder="例：大全、阿明" maxlength="12" autocomplete="off" enterkeyhint="go">
+    </div>
+    <button class="btn-main" id="btnStart">領取對獎卡</button>
+
+    <dl class="rules">
+      <dt>領卡之後</dt>
+      <dd>倒數 <b>60 秒</b>，時間內可以重選，共 <b>5 張</b>可換。</dd>
+      <dt>鎖盤</dt>
+      <dd>按下「確定這張」或時間到，就以當前這張卡片鎖定，之後不能再換。</dd>
+      <dt>對獎</dt>
+      <dd>叫到你的號碼就點它，會蓋上紅點。橫、直、斜任一條連滿就是一條線。</dd>
+    </dl>
+  </div>
+</section>
+
+<!-- ============ 選盤 ============ -->
+<section class="screen" id="scPick">
+  <div class="topbar">
+    <div>
+      <span class="lbl">選盤中</span>
+      <span class="big" id="pickDrawLabel">第 1 張 / 共 5 次</span>
+    </div>
+    <div class="timer" id="timer">
+      <svg viewBox="0 0 60 60" width="60" height="60">
+        <circle class="bg" cx="30" cy="30" r="26"></circle>
+        <circle class="fg" cx="30" cy="30" r="26" id="ring"></circle>
+      </svg>
+      <b id="tLeft">60</b>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-hd">
+      <div class="who">
+        <div class="nick" id="pickNick">—</div>
+        <div class="meta num" id="pickCode">卡號 —</div>
+      </div>
+      <span class="stamp live">未鎖盤</span>
+    </div>
+    <div class="grid" id="gridPick"></div>
+    <div class="stub">
+      <div>
+        <span class="k">持有者</span>
+        <span class="v" id="stubNick">—</span>
+      </div>
+      <div class="right">
+        <span class="k">可換</span>
+        <span class="v" id="stubRolls">4 <small>次</small></span>
+      </div>
+    </div>
+  </div>
+
+  <div class="acts">
+    <button class="btn-2" id="btnRoll">重選<small id="rollSub">剩 4 次</small></button>
+    <button class="btn-go" id="btnLock">確定這張</button>
+  </div>
+  <p class="hint">時間到會自動鎖定當前這張。鎖盤後不能更換。</p>
+</section>
+
+<!-- ============ 對獎 ============ -->
+<section class="screen" id="scPlay">
+  <div class="topbar">
+    <div>
+      <span class="lbl">已鎖盤</span>
+      <span class="big" id="playNick">—</span>
+    </div>
+    <span class="stamp live" id="playCode">卡號 —</span>
+  </div>
+
+  <div class="card">
+    <div class="card-hd">
+      <div class="who">
+        <div class="nick">對獎卡</div>
+        <div class="meta">點號碼蓋章</div>
+      </div>
+      <span class="stamp" id="lockStamp">LOCKED</span>
+    </div>
+    <div class="grid tap" id="gridPlay"></div>
+    <div class="stub">
+      <div>
+        <span class="k">已登記</span>
+        <span class="v num" id="stubMarked">0 <small>/ 25</small></span>
+      </div>
+      <div class="right">
+        <span class="k">連線</span>
+        <span class="v num" id="stubLines">0 <small>條</small></span>
+      </div>
+    </div>
+  </div>
+
+  <div class="scorebar">
+    <div class="score" id="cardLines">
+      <span class="k">完成連線</span>
+      <span class="v num" id="bigLines">0<em>條</em></span>
+    </div>
+    <div class="score" id="cardMarked">
+      <span class="k">已蓋章</span>
+      <span class="v num" id="bigMarked">0<em>格</em></span>
+    </div>
+  </div>
+
+  <div class="acts">
+    <button class="btn-2" id="btnClear">清除登記</button>
+    <button class="btn-2" id="btnReset">重新開始</button>
+  </div>
+  <p class="hint">點錯再點一次可以取消。重新開始會清掉這張卡。</p>
+</section>
+
+<div class="flash" id="flash"><span>BINGO!</span></div>
+<div class="toast" id="toast"></div>
+<button class="verchip" id="verChip">v1.0.0</button>
+
+<script>
+window.APP_VERSION = '1.0.0';
+
+const KEY = 'bingoCard.v1';
+const SECONDS = 60;        // 選盤倒數
+const TOTAL_DRAWS = 5;     // 每人可抽選的張數（第 1 張 + 重選）
+const POOL = 99;           // 號碼範圍 1–99
+const SIDE = 5;
+
+const LINES = (() => {
+  const out = [];
+  for (let r = 0; r < SIDE; r++) out.push([...Array(SIDE)].map((_, c) => r * SIDE + c));
+  for (let c = 0; c < SIDE; c++) out.push([...Array(SIDE)].map((_, r) => r * SIDE + c));
+  out.push([...Array(SIDE)].map((_, i) => i * SIDE + i));
+  out.push([...Array(SIDE)].map((_, i) => i * SIDE + (SIDE - 1 - i)));
+  return out;
+})();
+
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+
+let state = null;
+let tick = null;
+let lastLines = 0;
+
+/* ---------- board ---------- */
+function makeBoard() {
+  const pool = Array.from({ length: POOL }, (_, i) => i + 1);
+  for (let i = pool.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [pool[i], pool[j]] = [pool[j], pool[i]];
+  }
+  return pool.slice(0, SIDE * SIDE);
+}
+function cardCode(nick, board) {
+  let h = 5381;
+  const s = nick + '|' + board.join(',');
+  for (let i = 0; i < s.length; i++) h = ((h << 5) + h + s.charCodeAt(i)) >>> 0;
+  return h.toString(36).toUpperCase().slice(-5).padStart(5, '0');
+}
+
+/* ---------- store ---------- */
+function load() {
+  try {
+    const raw = localStorage.getItem(KEY);
+    if (!raw) return null;
+    const d = JSON.parse(raw);
+    if (!d || !Array.isArray(d.board) || d.board.length !== SIDE * SIDE) return null;
+    if (!Array.isArray(d.marks)) d.marks = [];
+    return d;
+  } catch (e) { return null; }
+}
+function save() {
+  if (!state) return;
+  try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {}
+}
+
+/* ---------- screens ---------- */
+function show(name) {
+  $$('.screen').forEach(el => el.classList.remove('on'));
+  $('#sc' + name).classList.add('on');
+  window.scrollTo(0, 0);
+}
+
+function toast(msg) {
+  const t = $('#toast');
+  t.textContent = msg;
+  t.classList.add('on');
+  clearTimeout(t._h);
+  t._h = setTimeout(() => t.classList.remove('on'), 1900);
+}
+
+/* ---------- render ---------- */
+function renderGrid(el, board, marks, hits, interactive) {
+  const marked = new Set(marks);
+  const hitSet = new Set(hits);
+  el.innerHTML = board.map(n => {
+    const on = marked.has(n);
+    const hit = hitSet.has(n);
+    return `<button class="cell${on ? ' marked' : ''}${hit ? ' hit' : ''}" data-n="${n}" ${interactive ? '' : 'tabindex="-1"'}>
+      <span class="daub"></span><span class="v">${n}</span>
+    </button>`;
+  }).join('');
+}
+
+function computeLines() {
+  const marked = new Set(state.marks);
+  const hit = new Set();
+  let n = 0;
+  LINES.forEach(line => {
+    if (line.every(i => marked.has(state.board[i]))) {
+      n++;
+      line.forEach(i => hit.add(state.board[i]));
+    }
+  });
+  return { count: n, cells: [...hit] };
+}
+
+/* ---------- pick ---------- */
+function enterPick() {
+  show('Pick');
+  $('#pickNick').textContent = state.nick;
+  $('#pickCode').textContent = '卡號 ' + state.code;
+  $('#stubNick').textContent = state.nick;
+  const left = TOTAL_DRAWS - state.draws;
+  $('#pickDrawLabel').textContent = `第 ${state.draws} 張 / 共 ${TOTAL_DRAWS} 次`;
+  $('#stubRolls').innerHTML = `${left} <small>次</small>`;
+  $('#rollSub').textContent = left ? `剩 ${left} 次` : '已用完';
+  $('#btnRoll').disabled = left <= 0;
+  renderGrid($('#gridPick'), state.board, [], [], false);
+  startTimer();
+}
+
+function startTimer() {
+  stopTick();
+  tick = setInterval(updateTimer, 200);
+  updateTimer();
+}
+function stopTick() { if (tick) { clearInterval(tick); tick = null; } }
+
+function remainingMs() {
+  return Math.max(0, SECONDS * 1000 - (Date.now() - state.startedAt));
+}
+function updateTimer() {
+  if (!state || state.lockedAt) { stopTick(); return; }
+  const ms = remainingMs();
+  const left = Math.ceil(ms / 1000);
+  const frac = ms / (SECONDS * 1000);
+  const C = 2 * Math.PI * 26;
+  const ring = $('#ring');
+  ring.style.strokeDasharray = C;
+  ring.style.strokeDashoffset = C * (1 - frac);
+  $('#tLeft').textContent = left;
+  $('#timer').classList.toggle('warn', left <= 15);
+  if (ms <= 0) lockCard(true);
+}
+
+function reroll() {
+  const left = TOTAL_DRAWS - state.draws;
+  if (left <= 0) return;
+  state.board = makeBoard();
+  state.draws++;
+  state.code = cardCode(state.nick, state.board);
+  save();
+  enterPick();
+  toast(`換了第 ${state.draws} 張`);
+}
+
+function lockCard(auto) {
+  if (state.lockedAt) return;
+  const now = Date.now();
+  state.lockedAt = auto ? state.startedAt + SECONDS * 1000 : now;
+  state.marks = [];
+  save();
+  stopTick();
+  enterPlay();
+  toast(auto ? '時間到，已鎖定這張卡' : '已鎖盤，開始對獎');
+}
+
+/* ---------- play ---------- */
+function enterPlay() {
+  show('Play');
+  $('#playNick').textContent = state.nick;
+  $('#playCode').textContent = '卡號 ' + state.code;
+  lastLines = 0;
+  paintPlay();
+}
+
+function paintPlay() {
+  const { count, cells } = computeLines();
+  renderGrid($('#gridPlay'), state.board, state.marks, cells, true);
+  $('#stubMarked').innerHTML = `${state.marks.length} <small>/ 25</small>`;
+  $('#stubLines').innerHTML = `${count} <small>條</small>`;
+  $('#bigLines').innerHTML = `${count}<em>條</em>`;
+  $('#bigMarked').innerHTML = `${state.marks.length}<em>格</em>`;
+  $('#cardLines').classList.toggle('on', count > 0);
+  if (count > lastLines) {
+    const f = $('#flash');
+    f.classList.remove('go');
+    void f.offsetWidth;
+    f.classList.add('go');
+    if (navigator.vibrate) try { navigator.vibrate([40, 60, 90]); } catch (e) {}
+  }
+  lastLines = count;
+}
+
+function toggleMark(n) {
+  const i = state.marks.indexOf(n);
+  if (i >= 0) state.marks.splice(i, 1);
+  else state.marks.push(n);
+  save();
+  paintPlay();
+}
+
+/* ---------- boot ---------- */
+function boot() {
+  state = load();
+  $('#verChip').textContent = 'v' + window.APP_VERSION;
+
+  if (state && state.lockedAt) { enterPlay(); }
+  else if (state && remainingMs() > 0) { enterPick(); }
+  else if (state) { lockCard(true); }
+  else { show('Intro'); }
+
+  $('#btnStart').onclick = () => {
+    const nick = $('#nick').value.trim();
+    if (!nick) { $('#nick').focus(); toast('先填一個暱稱'); return; }
+    state = {
+      nick: nick.slice(0, 12),
+      board: makeBoard(),
+      code: '',
+      draws: 1,
+      startedAt: Date.now(),
+      lockedAt: null,
+      marks: []
+    };
+    state.code = cardCode(state.nick, state.board);
+    save();
+    enterPick();
+  };
+  $('#nick').addEventListener('keydown', e => { if (e.key === 'Enter') $('#btnStart').click(); });
+  $('#btnRoll').onclick = reroll;
+  $('#btnLock').onclick = () => lockCard(false);
+
+  $('#gridPlay').addEventListener('click', e => {
+    const c = e.target.closest('.cell');
+    if (!c) return;
+    toggleMark(Number(c.dataset.n));
+  });
+  $('#btnClear').onclick = () => {
+    if (!state.marks.length) return;
+    if (!confirm('清除所有已蓋的章？')) return;
+    state.marks = [];
+    save();
+    paintPlay();
+  };
+  $('#btnReset').onclick = () => {
+    if (!confirm('重新開始會清掉這張卡，確定嗎？')) return;
+    localStorage.removeItem(KEY);
+    state = null;
+    stopTick();
+    $('#nick').value = '';
+    show('Intro');
+  };
+  $('#verChip').onclick = async () => {
+    if (!confirm('重新載入並清除快取？\n（這張卡不會消失）')) return;
+    try {
+      const rs = await navigator.serviceWorker.getRegistrations();
+      await Promise.all(rs.map(r => r.unregister()));
+      if (window.caches) { const ks = await caches.keys(); await Promise.all(ks.map(k => caches.delete(k))); }
+    } catch (e) {}
+    location.reload();
+  };
+
+  if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
+
+  window.__bingo = {
+    state: () => state,
+    show, enterPick, enterPlay, lockCard, reroll, toggleMark, makeBoard, computeLines,
+    setState: s => { state = s; save(); }
+  };
+}
+document.addEventListener('DOMContentLoaded', boot);
+</script>
+</body>
+</html>
