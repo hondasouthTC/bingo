@@ -243,6 +243,34 @@ button{cursor:pointer}
   padding:6px;z-index:5;
 }
 .hide{display:none!important}
+/* ---------- 倒數閘門 ---------- */
+.gate{padding-top:2vh;text-align:center}
+.gate .banner{margin-bottom:20px}
+.gateh1{font-size:34px;margin:6px 0 10px}
+.gateh1 span{color:var(--gold)}
+.gate .lede{font-size:13px}
+.gate .eyebrow{text-align:center;margin-bottom:6px}
+.cd{display:flex;gap:8px;margin:22px 0 0;justify-content:center}
+.cdb{
+  flex:1;max-width:88px;background:rgba(0,0,0,.32);border:1px solid rgba(244,241,232,.12);
+  border-radius:13px;padding:13px 4px 10px;position:relative;
+}
+.cdb:after{
+  content:'';position:absolute;top:0;left:22%;right:22%;height:2px;border-radius:2px;
+  background:linear-gradient(90deg,transparent,rgba(242,183,5,.75),transparent);
+}
+.cdb b{
+  display:block;font-size:30px;font-weight:800;letter-spacing:-.03em;line-height:1;
+  font-variant-numeric:tabular-nums;color:#fff;
+}
+.cdb span{display:block;font-size:9.5px;font-weight:800;letter-spacing:.18em;color:rgba(244,241,232,.4);margin-top:7px}
+.cd.soon .cdb b{color:var(--gold)}
+.gatetime{
+  margin:20px 0 0;font-size:12.5px;color:rgba(244,241,232,.6);letter-spacing:.02em;
+  display:inline-flex;align-items:center;gap:7px;background:rgba(0,0,0,.26);
+  border:1px solid rgba(244,241,232,.1);border-radius:999px;padding:6px 13px;
+}
+.gatetime i{width:6px;height:6px;border-radius:50%;background:var(--gold);display:block}
 @media (prefers-reduced-motion: reduce){*{animation-duration:.001s!important;transition-duration:.001s!important}}
 @media (max-height:720px){
   .intro{padding-top:3vh}
@@ -256,6 +284,26 @@ button{cursor:pointer}
 <div class="bgbase"></div>
 <div class="bgphoto"></div>
 <div class="bgscrim"></div>
+
+<!-- ============ 未開放倒數 ============ -->
+<section class="screen" id="scGate">
+  <div class="gate">
+    <img class="banner" src="banner.jpg" alt="劍映梨花">
+    <p class="eyebrow">NOT YET OPEN</p>
+    <h1 class="h1 gateh1">尚未<span>開放</span></h1>
+    <p class="lede">時間到會自動開場，不用重新整理。</p>
+
+    <div class="cd" id="cd">
+      <div class="cdb"><b id="cdD">00</b><span>天</span></div>
+      <div class="cdb"><b id="cdH">00</b><span>時</span></div>
+      <div class="cdb"><b id="cdM">00</b><span>分</span></div>
+      <div class="cdb"><b id="cdS">00</b><span>秒</span></div>
+    </div>
+
+    <p class="gatetime" id="gateTime"><i></i>2026/11/14（六）21:30 開放</p>
+    <p class="hint">倒數依這台裝置的時間計算</p>
+  </div>
+</section>
 
 <!-- ============ 入場 ============ -->
 <section class="screen on" id="scIntro">
@@ -388,13 +436,15 @@ button{cursor:pointer}
 <button class="verchip" id="verChip">v1.1.0</button>
 
 <script>
-window.APP_VERSION = '1.2.2';
+window.APP_VERSION = '1.3.0';
 
 const KEY = 'bingoCard.v2';
 const HIST = 'bingoHist.v1';
 const SECONDS = 60;         // 每局選盤倒數
 const DRAWS_PER_ROUND = 5;  // 每局可抽的張數（第 1 張 + 重選）
 const ROUNDS = 10;          // 預先承諾的局數
+const OPEN_AT = Date.parse('2026-11-14T21:30:00+08:00');  // 開放時間（台北時間）
+const EARLY = 'bingoEarlyUnlock';   // 主辦提早入場（只存在本次瀏覽）
 const POOL = 99;            // 號碼池 1–99
 const SIDE = 5;
 
@@ -651,18 +701,77 @@ function nextRound() {
   toast(`第 ${n + 1} 局開始，60 秒內可換盤`);
 }
 
-/* ---------- 啟動 ---------- */
-function boot() {
-  state = load();
-  $('#verChip').textContent = 'v' + window.APP_VERSION;
+/* ---------- 倒數閘門 ---------- */
+let gateTimer = null;
 
+function isOpen() {
+  if (Date.now() >= OPEN_AT) return true;
+  try { return sessionStorage.getItem(EARLY) === '1'; } catch (e) { return false; }
+}
+
+function pad2(n) { return String(n).padStart(2, '0'); }
+
+function paintGate() {
+  const ms = Math.max(0, OPEN_AT - Date.now());
+  const d = Math.floor(ms / 86400000);
+  const h = Math.floor(ms % 86400000 / 3600000);
+  const m = Math.floor(ms % 3600000 / 60000);
+  const sec = Math.floor(ms % 60000 / 1000);
+  const D = $('#cdD'), H = $('#cdH'), M = $('#cdM'), S = $('#cdS');
+  if (D) D.textContent = pad2(d);
+  if (H) H.textContent = pad2(h);
+  if (M) M.textContent = pad2(m);
+  if (S) S.textContent = pad2(sec);
+  const cd = $('#cd');
+  if (cd) cd.classList.toggle('soon', ms <= 3600000);
+  return ms;
+}
+
+function startGate() {
+  show('Gate');
+  stopGate();
+  paintGate();
+  gateTimer = setInterval(() => {
+    const ms = paintGate();
+    if (ms <= 0) {
+      stopGate();
+      toast('活動開始了，歡迎入場');
+      resumeApp();
+    }
+  }, 250);
+
+  // 主辦：長按倒數 2.5 秒提早入場，再長按一次收回
+  const zone = $('#scGate');
+  let holdTimer = null;
+  const begin = e => {
+    if (e && e.type === 'mousedown' && e.button !== 0) return;
+    clearTimeout(holdTimer);
+    holdTimer = setTimeout(() => {
+      let on = false;
+      try { on = sessionStorage.getItem(EARLY) === '1'; } catch (err) {}
+      try { if (on) sessionStorage.removeItem(EARLY); else sessionStorage.setItem(EARLY, '1'); } catch (err) {}
+      if (on) { stopGate(); startGate(); toast('已收回，恢復倒數'); }
+      else { stopGate(); toast('已提早入場（主辦）'); resumeApp(); }
+    }, 2500);
+  };
+  const end = () => clearTimeout(holdTimer);
+  zone.addEventListener('mousedown', begin);
+  zone.addEventListener('touchstart', begin, { passive: true });
+  ['mouseup', 'mouseleave', 'touchend', 'touchcancel'].forEach(ev => zone.addEventListener(ev, end));
+}
+function stopGate() { if (gateTimer) { clearInterval(gateTimer); gateTimer = null; } }
+
+/* ---------- 啟動 ---------- */
+let booted = false;
+function resumeApp() {
+  stopGate();
+  state = load();
   const hist = histList();
   if (hist.length) {
     const w = $('#histWarn');
     w.classList.remove('hide');
     w.innerHTML = `<b>這台裝置已領過 ${hist.length} 張卡。</b><br>主辦可以用承諾碼核對。若這一輪是同一場活動，請直接沿用原本那張卡，不要重領。`;
   }
-
   if (state) {
     const r = curRound();
     if (r && r.lockedAt) enterPlay();
@@ -672,6 +781,12 @@ function boot() {
   } else {
     show('Intro');
   }
+}
+function boot() {
+  $('#verChip').textContent = 'v' + window.APP_VERSION;
+  booted = true;
+
+  if (!isOpen()) { startGate(); } else { resumeApp(); }
 
   $('#btnStart').onclick = () => {
     const nick = $('#nick').value.trim();
