@@ -34,7 +34,7 @@ body{
 .bgphoto{
   position:fixed;inset:0;z-index:0;pointer-events:none;
   background-image:url('bg.jpg');background-size:cover;background-position:center;
-  opacity:.42;
+  opacity:1;
 }
 .bgbase{
   position:fixed;inset:0;z-index:0;pointer-events:none;
@@ -44,8 +44,8 @@ body{
 .bgscrim{
   position:fixed;inset:0;z-index:0;pointer-events:none;
   background:
-    radial-gradient(120% 80% at 50% 0%, rgba(10,36,33,.55) 0%, rgba(10,36,33,.86) 55%, rgba(10,36,33,.95) 100%),
-    linear-gradient(180deg, rgba(10,36,33,.9), rgba(10,36,33,.72) 40%, rgba(10,36,33,.92));
+    radial-gradient(120% 85% at 50% 8%, rgba(10,36,33,.30) 0%, rgba(10,36,33,.62) 58%, rgba(8,30,28,.86) 100%),
+    linear-gradient(180deg, rgba(10,36,33,.55), rgba(10,36,33,.30) 38%, rgba(8,30,28,.78));
 }
 body::before{
   content:''; position:fixed; inset:0; pointer-events:none; z-index:1;
@@ -63,7 +63,12 @@ button{cursor:pointer}
 .num{font-variant-numeric:tabular-nums;font-feature-settings:"tnum" 1}
 
 /* ---------- intro ---------- */
-.intro{padding-top:7vh}
+.intro{padding-top:2vh}
+.banner{
+  width:100%;display:block;border-radius:16px;margin-bottom:18px;
+  border:1px solid rgba(244,241,232,.16);
+  box-shadow:0 22px 40px -26px rgba(0,0,0,.95), 0 0 0 1px rgba(0,0,0,.25);
+}
 .ticket-mini{
   display:inline-flex;align-items:center;gap:7px;background:rgba(244,241,232,.09);
   border:1px solid rgba(244,241,232,.16);border-radius:999px;padding:5px 11px 5px 7px;
@@ -71,7 +76,8 @@ button{cursor:pointer}
 }
 .ticket-mini i{width:7px;height:7px;border-radius:50%;background:var(--daub);display:block}
 .intro h1.h1 span{color:var(--gold)}
-.field{margin:26px 0 0}
+.intro .h1{font-size:33px;margin-bottom:9px}
+.field{margin:20px 0 0}
 .field label{display:block;font-size:10.5px;font-weight:800;letter-spacing:.16em;color:rgba(244,241,232,.5);margin-bottom:8px}
 .field input{
   width:100%;height:56px;border-radius:var(--r);padding:0 16px;font-size:19px;font-weight:700;letter-spacing:.01em;
@@ -86,7 +92,7 @@ button{cursor:pointer}
 }
 .btn-main:active{transform:translateY(1px) scale(.995);background:var(--daub-dk)}
 .btn-main:focus-visible{outline:3px solid var(--gold);outline-offset:3px}
-.rules{margin:22px 0 0;padding:15px 16px;border-radius:12px;background:rgba(0,0,0,.3);border:1px solid rgba(244,241,232,.08)}
+.rules{margin:18px 0 0;padding:13px 15px;border-radius:12px;background:rgba(0,0,0,.3);border:1px solid rgba(244,241,232,.08)}
 .rules dt{font-size:10px;font-weight:800;letter-spacing:.16em;color:rgba(244,241,232,.42);margin:0 0 3px}
 .rules dd{margin:0 0 10px;font-size:12.5px;color:rgba(244,241,232,.78);line-height:1.6}
 .rules dd:last-child{margin-bottom:0}
@@ -254,7 +260,7 @@ button{cursor:pointer}
 <!-- ============ 入場 ============ -->
 <section class="screen on" id="scIntro">
   <div class="intro">
-    <span class="ticket-mini"><i></i>BINGO CHECK CARD</span>
+    <img class="banner" src="banner.jpg" alt="劍映梨花">
     <h1 class="h1">賓果<span>對獎</span></h1>
     <p class="lede">主持人直播報號，你只要在自己的卡上點號碼。<br>連成一條線，就是賓果。</p>
 
@@ -382,7 +388,7 @@ button{cursor:pointer}
 <button class="verchip" id="verChip">v1.1.0</button>
 
 <script>
-window.APP_VERSION = '1.1.2';
+window.APP_VERSION = '1.2.0';
 
 const KEY = 'bingoCard.v2';
 const HIST = 'bingoHist.v1';
