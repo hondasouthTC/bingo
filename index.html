@@ -114,7 +114,7 @@ button{cursor:pointer}
   box-shadow:inset 0 -2px 5px rgba(0,0,0,.16), inset 0 2px 4px rgba(255,255,255,.3);
 }
 .cell .v{position:relative;z-index:2;line-height:1}
-.cell.marked{color:#FFF6F1;border-color:var(--daub-dk)}
+.cell.marked{color:#FFF6F1;border-color:rgba(232,69,44,.3)}
 .cell.marked .daub{animation:daubIn .34s cubic-bezier(.2,1.5,.45,1) forwards}
 @keyframes daubIn{0%{transform:scale(0) rotate(-14deg);opacity:0}60%{opacity:1}100%{transform:scale(1) rotate(-5deg);opacity:1}}
 .cell.hit{border-color:var(--gold);box-shadow:0 0 0 2px var(--gold), 0 0 14px -2px rgba(242,183,5,.7)}
@@ -271,8 +271,8 @@ button{cursor:pointer}
         <span class="v" id="stubNick">—</span>
       </div>
       <div class="right">
-        <span class="k">可換</span>
-        <span class="v" id="stubRolls">4 <small>次</small></span>
+        <span class="k">本場第</span>
+        <span class="v num" id="stubDraw">1 <small>/ 5 張</small></span>
       </div>
     </div>
   </div>
@@ -338,7 +338,7 @@ button{cursor:pointer}
 <button class="verchip" id="verChip">v1.0.0</button>
 
 <script>
-window.APP_VERSION = '1.0.0';
+window.APP_VERSION = '1.0.1';
 
 const KEY = 'bingoCard.v1';
 const SECONDS = 60;        // 選盤倒數
@@ -443,7 +443,7 @@ function enterPick() {
   $('#stubNick').textContent = state.nick;
   const left = TOTAL_DRAWS - state.draws;
   $('#pickDrawLabel').textContent = `第 ${state.draws} 張 / 共 ${TOTAL_DRAWS} 次`;
-  $('#stubRolls').innerHTML = `${left} <small>次</small>`;
+  $('#stubDraw').innerHTML = `${state.draws} <small>/ ${TOTAL_DRAWS} 張</small>`;
   $('#rollSub').textContent = left ? `剩 ${left} 次` : '已用完';
   $('#btnRoll').disabled = left <= 0;
   renderGrid($('#gridPick'), state.board, [], [], false);
