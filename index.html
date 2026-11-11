@@ -23,30 +23,47 @@
 }
 html,body{margin:0;padding:0;height:100%}
 body{
-  background:radial-gradient(130% 90% at 50% -10%, var(--felt-hi) 0%, var(--felt) 42%, var(--felt-lo) 100%);
+  background:var(--felt-lo);
   color:var(--card); font-family:-apple-system,BlinkMacSystemFont,"PingFang TC","Noto Sans TC","Microsoft JhengHei",system-ui,sans-serif;
   -webkit-font-smoothing:antialiased; font-size:15px; line-height:1.5;
   min-height:100vh; min-height:100dvh;
   padding:calc(14px + env(safe-area-inset-top)) 16px calc(18px + env(safe-area-inset-bottom));
+  position:relative; overflow-x:hidden;
+}
+/* 背景照片層：把 bg.jpg 放進資料夾就會自動套用，沒有檔案時退回絨布底 */
+.bgphoto{
+  position:fixed;inset:0;z-index:0;pointer-events:none;
+  background-image:url('bg.jpg');background-size:cover;background-position:center;
+  opacity:.42;
+}
+.bgbase{
+  position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:radial-gradient(130% 90% at 50% -10%, var(--felt-hi) 0%, var(--felt) 42%, var(--felt-lo) 100%);
+  opacity:1;
+}
+.bgscrim{
+  position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:
+    radial-gradient(120% 80% at 50% 0%, rgba(10,36,33,.55) 0%, rgba(10,36,33,.86) 55%, rgba(10,36,33,.95) 100%),
+    linear-gradient(180deg, rgba(10,36,33,.9), rgba(10,36,33,.72) 40%, rgba(10,36,33,.92));
 }
 body::before{
-  content:''; position:fixed; inset:0; pointer-events:none; z-index:0;
+  content:''; position:fixed; inset:0; pointer-events:none; z-index:1;
   background-image:radial-gradient(rgba(255,255,255,.045) .8px, transparent .8px);
-  background-size:3px 3px; opacity:.55;
+  background-size:3px 3px; opacity:.5;
 }
 button,input{font-family:inherit}
 button{cursor:pointer}
-.screen{position:relative;z-index:1;max-width:430px;margin:0 auto;display:none}
+.screen{position:relative;z-index:2;max-width:430px;margin:0 auto;display:none}
 .screen.on{display:block}
 
-/* ---------- shared type ---------- */
 .eyebrow{font-size:10px;font-weight:800;letter-spacing:.26em;color:rgba(244,241,232,.5);margin:0 0 10px}
 .h1{font-size:38px;line-height:1.06;font-weight:800;letter-spacing:-.02em;margin:0 0 12px;color:#fff}
 .lede{font-size:13.5px;line-height:1.75;color:rgba(244,241,232,.72);margin:0}
 .num{font-variant-numeric:tabular-nums;font-feature-settings:"tnum" 1}
 
 /* ---------- intro ---------- */
-.intro{padding-top:8vh}
+.intro{padding-top:7vh}
 .ticket-mini{
   display:inline-flex;align-items:center;gap:7px;background:rgba(244,241,232,.09);
   border:1px solid rgba(244,241,232,.16);border-radius:999px;padding:5px 11px 5px 7px;
@@ -60,7 +77,6 @@ button{cursor:pointer}
   width:100%;height:56px;border-radius:var(--r);padding:0 16px;font-size:19px;font-weight:700;letter-spacing:.01em;
   background:rgba(244,241,232,.07);border:1.5px solid rgba(244,241,232,.18);color:#fff;
 }
-.field input::placeholder{color:rgba(244,241,232,.28);font-weight:600}
 .field input:focus{outline:none;border-color:var(--gold);background:rgba(244,241,232,.11);box-shadow:0 0 0 4px rgba(242,183,5,.14)}
 .btn-main{
   width:100%;height:56px;margin-top:14px;border:0;border-radius:var(--r);
@@ -70,11 +86,17 @@ button{cursor:pointer}
 }
 .btn-main:active{transform:translateY(1px) scale(.995);background:var(--daub-dk)}
 .btn-main:focus-visible{outline:3px solid var(--gold);outline-offset:3px}
-.rules{margin:22px 0 0;padding:15px 16px;border-radius:12px;background:rgba(0,0,0,.18);border:1px solid rgba(244,241,232,.08)}
+.rules{margin:22px 0 0;padding:15px 16px;border-radius:12px;background:rgba(0,0,0,.3);border:1px solid rgba(244,241,232,.08)}
 .rules dt{font-size:10px;font-weight:800;letter-spacing:.16em;color:rgba(244,241,232,.42);margin:0 0 3px}
 .rules dd{margin:0 0 10px;font-size:12.5px;color:rgba(244,241,232,.78);line-height:1.6}
 .rules dd:last-child{margin-bottom:0}
 .rules b{color:var(--gold);font-weight:800}
+.warnbox{
+  margin:16px 0 0;padding:12px 14px;border-radius:12px;
+  background:rgba(232,69,44,.14);border:1px solid rgba(232,69,44,.42);
+  font-size:12px;line-height:1.6;color:#FFC9BE;
+}
+.warnbox b{color:#fff;font-weight:800}
 
 /* ---------- card ---------- */
 .card{
@@ -87,10 +109,16 @@ button{cursor:pointer}
   background-image:radial-gradient(rgba(22,34,31,.05) .7px, transparent .7px);background-size:2.5px 2.5px;
   opacity:.8;
 }
-.card-hd{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:0 2px 11px;position:relative;z-index:1}
-.card-hd .who{min-width:0}
+.card-hd{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;padding:0 2px 11px;position:relative;z-index:1}
+.card-hd .who{min-width:0;flex:1}
 .card-hd .nick{font-size:17px;font-weight:800;letter-spacing:.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .card-hd .meta{font-size:10px;font-weight:800;letter-spacing:.14em;color:var(--ink-3);margin-top:2px}
+.roundbadge{
+  flex:none;display:inline-flex;flex-direction:column;align-items:center;justify-content:center;
+  min-width:52px;padding:5px 9px;border-radius:9px;background:var(--ink);color:var(--card);
+}
+.roundbadge em{font-style:normal;font-size:9px;font-weight:800;letter-spacing:.18em;opacity:.55;line-height:1}
+.roundbadge b{font-size:19px;font-weight:800;line-height:1.1;font-variant-numeric:tabular-nums}
 .stamp{
   flex:none;font-size:9.5px;font-weight:800;letter-spacing:.14em;padding:4px 8px;border-radius:5px;
   border:1.5px dashed var(--line);color:var(--ink-3);
@@ -120,13 +148,13 @@ button{cursor:pointer}
 .cell.hit{border-color:var(--gold);box-shadow:0 0 0 2px var(--gold), 0 0 14px -2px rgba(242,183,5,.7)}
 .cell.hit .v{color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.35)}
 
-/* stub */
 .stub{
-  position:relative;margin:0 -14px;padding:12px 16px 14px;background:rgba(22,34,31,.055);
+  position:relative;margin:0 -14px;padding:11px 16px 13px;background:rgba(22,34,31,.055);
   border-top:1.5px dashed rgba(22,34,31,.22);display:flex;align-items:center;justify-content:space-between;gap:12px;
 }
 .stub::before,.stub::after{
-  content:'';position:absolute;top:-8px;width:16px;height:16px;border-radius:50%;background:var(--felt);
+  content:'';position:absolute;top:-8px;width:16px;height:16px;border-radius:50%;
+  background:#16403A;
 }
 .stub::before{left:-8px} .stub::after{right:-8px}
 .stub .k{font-size:9.5px;font-weight:800;letter-spacing:.16em;color:var(--ink-3);display:block;margin-bottom:2px}
@@ -148,7 +176,7 @@ button{cursor:pointer}
 
 .acts{display:flex;gap:9px;margin-top:14px}
 .btn-2{
-  flex:1;height:52px;border-radius:var(--r);border:1.5px solid rgba(244,241,232,.2);background:transparent;
+  flex:1;height:52px;border-radius:var(--r);border:1.5px solid rgba(244,241,232,.2);background:rgba(0,0,0,.18);
   color:rgba(244,241,232,.86);font-size:14px;font-weight:800;letter-spacing:.04em;transition:.15s;
 }
 .btn-2 small{display:block;font-size:10px;font-weight:700;letter-spacing:.1em;color:rgba(244,241,232,.4);margin-top:1px}
@@ -165,56 +193,61 @@ button{cursor:pointer}
 .hint{font-size:11.5px;line-height:1.65;color:rgba(244,241,232,.45);margin:12px 2px 0;text-align:center}
 .hint b{color:rgba(244,241,232,.75);font-weight:700}
 
-/* play screen additions */
-.scorebar{display:flex;gap:8px;margin-top:14px}
-.score{flex:1;background:rgba(0,0,0,.2);border:1px solid rgba(244,241,232,.09);border-radius:12px;padding:10px 12px}
+/* round strip */
+.strip{display:flex;gap:6px;margin:12px 0 0;overflow-x:auto;padding-bottom:2px;-webkit-overflow-scrolling:touch}
+.strip::-webkit-scrollbar{display:none}
+.rchip{
+  flex:none;min-width:40px;height:30px;padding:0 10px;border-radius:8px;border:1px solid rgba(244,241,232,.16);
+  background:rgba(0,0,0,.2);color:rgba(244,241,232,.42);font-size:11.5px;font-weight:800;
+  font-variant-numeric:tabular-nums;display:flex;align-items:center;justify-content:center;gap:3px;
+}
+.rchip b{font-size:12.5px;font-weight:800}
+.rchip.done{color:#9FE6C9;border-color:rgba(159,230,201,.4);background:rgba(159,230,201,.1)}
+.rchip.cur{color:#2A1F00;background:var(--gold);border-color:var(--gold);box-shadow:0 4px 12px -6px rgba(242,183,5,.9)}
+
+.scorebar{display:flex;gap:8px;margin-top:12px}
+.score{flex:1;background:rgba(0,0,0,.26);border:1px solid rgba(244,241,232,.09);border-radius:12px;padding:10px 12px}
 .score .k{font-size:9.5px;font-weight:800;letter-spacing:.14em;color:rgba(244,241,232,.42);display:block;margin-bottom:2px}
 .score .v{font-size:20px;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:-.02em;color:#fff}
 .score .v em{font-style:normal;font-size:11px;font-weight:700;color:rgba(244,241,232,.45);margin-left:2px}
-.score.on{border-color:rgba(242,183,5,.5);background:rgba(242,183,5,.1)}
+.score.on{border-color:rgba(242,183,5,.5);background:rgba(242,183,5,.12)}
 .score.on .v{color:var(--gold)}
 
-/* bingo flash */
-.flash{
-  position:fixed;inset:0;z-index:60;display:flex;align-items:center;justify-content:center;
-  pointer-events:none;opacity:0;
-}
+.flash{position:fixed;inset:0;z-index:60;display:flex;align-items:center;justify-content:center;pointer-events:none;opacity:0}
 .flash.go{animation:flashIn 1.5s ease forwards}
 @keyframes flashIn{
-  0%{opacity:0;transform:scale(.6)}
-  18%{opacity:1;transform:scale(1.04)}
-  30%{transform:scale(1)}
-  78%{opacity:1}
-  100%{opacity:0}
+  0%{opacity:0;transform:scale(.6)}18%{opacity:1;transform:scale(1.04)}30%{transform:scale(1)}
+  78%{opacity:1}100%{opacity:0}
 }
 .flash span{
   font-size:44px;font-weight:900;letter-spacing:.06em;color:var(--gold);
-  text-shadow:0 0 28px rgba(242,183,5,.65), 0 3px 0 rgba(0,0,0,.35);
-  transform:rotate(-4deg);
+  text-shadow:0 0 28px rgba(242,183,5,.65), 0 3px 0 rgba(0,0,0,.35);transform:rotate(-4deg);
 }
 .toast{
   position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom));transform:translate(-50%,10px);
-  background:rgba(10,25,22,.95);border:1px solid rgba(244,241,232,.14);color:#fff;
+  background:rgba(10,25,22,.96);border:1px solid rgba(244,241,232,.14);color:#fff;
   font-size:12.5px;font-weight:700;padding:10px 16px;border-radius:10px;z-index:70;
   opacity:0;pointer-events:none;transition:.2s;max-width:86vw;text-align:center;
 }
 .toast.on{opacity:1;transform:translate(-50%,0)}
 .verchip{
-  position:fixed;left:50%;transform:translateX(-50%);bottom:calc(6px + env(safe-area-inset-bottom));
+  position:fixed;left:50%;transform:translateX(-50%);bottom:calc(4px + env(safe-area-inset-bottom));
   background:none;border:0;color:rgba(244,241,232,.24);font-size:9.5px;font-weight:700;letter-spacing:.12em;
   padding:6px;z-index:5;
 }
-@media (prefers-reduced-motion: reduce){
-  *{animation-duration:.001s!important;transition-duration:.001s!important}
-}
-@media (max-height:700px){
+@media (prefers-reduced-motion: reduce){*{animation-duration:.001s!important;transition-duration:.001s!important}}
+@media (max-height:720px){
   .intro{padding-top:3vh}
   .h1{font-size:32px}
-  .rules{margin-top:16px}
+  .rules{margin-top:16px;padding:12px 14px}
+  .rules dd{font-size:12px;margin-bottom:8px}
 }
 </style>
 </head>
 <body>
+<div class="bgbase"></div>
+<div class="bgphoto"></div>
+<div class="bgscrim"></div>
 
 <!-- ============ 入場 ============ -->
 <section class="screen on" id="scIntro">
@@ -225,18 +258,20 @@ button{cursor:pointer}
 
     <div class="field">
       <label for="nick">你的暱稱</label>
-      <input id="nick" placeholder="例：大全、阿明" maxlength="12" autocomplete="off" enterkeyhint="go">
+      <input id="nick" maxlength="12" autocomplete="off" enterkeyhint="go">
     </div>
     <button class="btn-main" id="btnStart">領取對獎卡</button>
 
     <dl class="rules">
       <dt>領卡之後</dt>
-      <dd>倒數 <b>60 秒</b>，時間內可以重選，共 <b>5 張</b>可換。</dd>
+      <dd>倒數 <b>60 秒</b>，時間內可以重選，每局 <b>5 張</b>可換。</dd>
       <dt>鎖盤</dt>
-      <dd>按下「確定這張」或時間到，就以當前這張卡片鎖定，之後不能再換。</dd>
-      <dt>對獎</dt>
-      <dd>叫到你的號碼就點它，會蓋上紅點。橫、直、斜任一條連滿就是一條線。</dd>
+      <dd>按下「確定這張」或時間到，就以當前這張卡片鎖定。鎖定後不能換、不能跳局。</dd>
+      <dt>多局</dt>
+      <dd>每一局都有自己的盤與卡號。這一局的盤只用在這一局，不能拿去下一局對獎。</dd>
     </dl>
+
+    <div class="warnbox hide" id="histWarn"></div>
   </div>
 </section>
 
@@ -244,8 +279,8 @@ button{cursor:pointer}
 <section class="screen" id="scPick">
   <div class="topbar">
     <div>
-      <span class="lbl">選盤中</span>
-      <span class="big" id="pickDrawLabel">第 1 張 / 共 5 次</span>
+      <span class="lbl" id="pickLbl">第 1 局・選盤中</span>
+      <span class="big num" id="pickDrawLabel">第 1 張 / 共 5 次</span>
     </div>
     <div class="timer" id="timer">
       <svg viewBox="0 0 60 60" width="60" height="60">
@@ -262,7 +297,7 @@ button{cursor:pointer}
         <div class="nick" id="pickNick">—</div>
         <div class="meta num" id="pickCode">卡號 —</div>
       </div>
-      <span class="stamp live">未鎖盤</span>
+      <div class="roundbadge"><em>ROUND</em><b id="pickRound">1</b></div>
     </div>
     <div class="grid" id="gridPick"></div>
     <div class="stub">
@@ -271,7 +306,7 @@ button{cursor:pointer}
         <span class="v" id="stubNick">—</span>
       </div>
       <div class="right">
-        <span class="k">本場第</span>
+        <span class="k">本局第</span>
         <span class="v num" id="stubDraw">1 <small>/ 5 張</small></span>
       </div>
     </div>
@@ -282,6 +317,7 @@ button{cursor:pointer}
     <button class="btn-go" id="btnLock">確定這張</button>
   </div>
   <p class="hint">時間到會自動鎖定當前這張。鎖盤後不能更換。</p>
+  <div class="strip" id="stripPick"></div>
 </section>
 
 <!-- ============ 對獎 ============ -->
@@ -298,9 +334,9 @@ button{cursor:pointer}
     <div class="card-hd">
       <div class="who">
         <div class="nick">對獎卡</div>
-        <div class="meta">點號碼蓋章</div>
+        <div class="meta num" id="playCommit">承諾碼 —</div>
       </div>
-      <span class="stamp" id="lockStamp">LOCKED</span>
+      <div class="roundbadge"><em>ROUND</em><b id="playRound">1</b></div>
     </div>
     <div class="grid tap" id="gridPlay"></div>
     <div class="stub">
@@ -326,24 +362,32 @@ button{cursor:pointer}
     </div>
   </div>
 
-  <div class="acts">
+  <div class="strip" id="stripPlay"></div>
+
+  <div class="acts" id="actsNext">
     <button class="btn-2" id="btnClear">清除登記</button>
-    <button class="btn-2" id="btnReset">重新開始</button>
+    <button class="btn-go" id="btnNext">下一局</button>
   </div>
-  <p class="hint">點錯再點一次可以取消。重新開始會清掉這張卡。</p>
+  <div class="acts hide" id="actsLast">
+    <button class="btn-2" id="btnClear2">清除登記</button>
+    <button class="btn-2" id="btnReissue" style="border-color:rgba(232,69,44,.5);color:#FFC9BE">放棄重領新卡</button>
+  </div>
+  <p class="hint" id="playHint">點錯再點一次可以取消。這一局的卡號請留著，對獎時要核對。</p>
 </section>
 
 <div class="flash" id="flash"><span>BINGO!</span></div>
 <div class="toast" id="toast"></div>
-<button class="verchip" id="verChip">v1.0.0</button>
+<button class="verchip" id="verChip">v1.1.0</button>
 
 <script>
-window.APP_VERSION = '1.0.1';
+window.APP_VERSION = '1.1.0';
 
-const KEY = 'bingoCard.v1';
-const SECONDS = 60;        // 選盤倒數
-const TOTAL_DRAWS = 5;     // 每人可抽選的張數（第 1 張 + 重選）
-const POOL = 99;           // 號碼範圍 1–99
+const KEY = 'bingoCard.v2';
+const HIST = 'bingoHist.v1';
+const SECONDS = 60;         // 每局選盤倒數
+const DRAWS_PER_ROUND = 5;  // 每局可抽的張數（第 1 張 + 重選）
+const ROUNDS = 10;          // 預先承諾的局數
+const POOL = 99;            // 號碼池 1–99
 const SIDE = 5;
 
 const LINES = (() => {
@@ -362,7 +406,7 @@ let state = null;
 let tick = null;
 let lastLines = 0;
 
-/* ---------- board ---------- */
+/* ---------- 亂數與簽章 ---------- */
 function makeBoard() {
   const pool = Array.from({ length: POOL }, (_, i) => i + 1);
   for (let i = pool.length - 1; i > 0; i--) {
@@ -371,147 +415,207 @@ function makeBoard() {
   }
   return pool.slice(0, SIDE * SIDE);
 }
-function cardCode(nick, board) {
+function hash36(str) {
   let h = 5381;
-  const s = nick + '|' + board.join(',');
-  for (let i = 0; i < s.length; i++) h = ((h << 5) + h + s.charCodeAt(i)) >>> 0;
+  for (let i = 0; i < str.length; i++) h = ((h << 5) + h + str.charCodeAt(i)) >>> 0;
   return h.toString(36).toUpperCase().slice(-5).padStart(5, '0');
 }
+function roundCode(roundNo, board, nick) {
+  return hash36([nick, 'R' + roundNo, board.join(',')].join('|'));
+}
 
-/* ---------- store ---------- */
+/* ---------- 儲存 ---------- */
 function load() {
   try {
     const raw = localStorage.getItem(KEY);
     if (!raw) return null;
     const d = JSON.parse(raw);
-    if (!d || !Array.isArray(d.board) || d.board.length !== SIDE * SIDE) return null;
-    if (!Array.isArray(d.marks)) d.marks = [];
+    if (!d || !d.nick || !d.rounds) return null;
+    if (!Array.isArray(d.boards) || d.boards.length < 1) return null;
     return d;
   } catch (e) { return null; }
 }
-function save() {
-  if (!state) return;
-  try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {}
+function save() { if (state) try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {} }
+
+function histList() {
+  try { const raw = localStorage.getItem(HIST); const a = raw ? JSON.parse(raw) : []; return Array.isArray(a) ? a : []; }
+  catch (e) { return []; }
+}
+function histAdd(entry) {
+  const a = histList();
+  a.push(entry);
+  try { localStorage.setItem(HIST, JSON.stringify(a.slice(-20))); } catch (e) {}
 }
 
-/* ---------- screens ---------- */
+/* ---------- 畫面 ---------- */
 function show(name) {
   $$('.screen').forEach(el => el.classList.remove('on'));
   $('#sc' + name).classList.add('on');
   window.scrollTo(0, 0);
 }
-
 function toast(msg) {
   const t = $('#toast');
   t.textContent = msg;
   t.classList.add('on');
   clearTimeout(t._h);
-  t._h = setTimeout(() => t.classList.remove('on'), 1900);
+  t._h = setTimeout(() => t.classList.remove('on'), 2100);
 }
 
-/* ---------- render ---------- */
+/* ---------- 局 ---------- */
+function rd(n) { return state.rounds[String(n)]; }
+function curRound() { return rd(state.cur); }
+function maxPlayed() {
+  return Math.max(...Object.keys(state.rounds).map(Number), 1);
+}
+function openRound(n) {
+  if (n < 1 || n > ROUNDS) return;
+  const k = String(n);
+  if (!state.rounds[k]) {
+    const board = state.boards[n - 1] ? state.boards[n - 1].slice() : makeBoard();
+    state.rounds[k] = {
+      board,
+      code: roundCode(n, board, state.nick),
+      draws: 1,
+      startedAt: Date.now(),
+      lockedAt: null,
+      marks: []
+    };
+  }
+  state.cur = n;
+  save();
+  const r = rd(n);
+  if (r.lockedAt) enterPlay(); else enterPick();
+}
+
+/* ---------- 選盤 ---------- */
+function enterPick() {
+  const n = state.cur, r = curRound();
+  show('Pick');
+  $('#pickLbl').textContent = `第 ${n} 局・選盤中`;
+  $('#pickNick').textContent = state.nick;
+  $('#pickCode').textContent = '卡號 ' + r.code;
+  $('#pickRound').textContent = n;
+  $('#stubNick').textContent = state.nick;
+  $('#stubDraw').innerHTML = `${r.draws} <small>/ ${DRAWS_PER_ROUND} 張</small>`;
+  $('#pickDrawLabel').textContent = `第 ${r.draws} 張 / 共 ${DRAWS_PER_ROUND} 次`;
+  const left = DRAWS_PER_ROUND - r.draws;
+  $('#rollSub').textContent = left ? `剩 ${left} 次` : '已用完';
+  $('#btnRoll').disabled = left <= 0;
+  renderGrid($('#gridPick'), r.board, [], [], false);
+  paintStrip($('#stripPick'));
+  startTimer();
+}
+
+function paintStrip(el) {
+  const cur = state.cur, max = Math.max(maxPlayed(), cur);
+  let html = '';
+  for (let i = 1; i <= max; i++) {
+    const r = rd(i);
+    const cls = i === cur ? 'cur' : (r && r.lockedAt ? 'done' : '');
+    const mark = r && r.lockedAt ? '✓' : '';
+    html += `<span class="rchip ${cls}"><b>${i}</b>${mark}</span>`;
+  }
+  el.innerHTML = html;
+  el.scrollLeft = el.scrollWidth;
+}
+
+function startTimer() { stopTick(); tick = setInterval(updateTimer, 200); updateTimer(); }
+function stopTick() { if (tick) { clearInterval(tick); tick = null; } }
+function remainingMs() {
+  const r = curRound();
+  if (!r) return 0;
+  return Math.max(0, SECONDS * 1000 - (Date.now() - r.startedAt));
+}
+function updateTimer() {
+  const r = curRound();
+  if (!state || !r || r.lockedAt) { stopTick(); return; }
+  const ms = remainingMs();
+  const left = Math.ceil(ms / 1000);
+  const C = 2 * Math.PI * 26;
+  const ring = $('#ring');
+  if (ring) {
+    ring.style.strokeDasharray = C;
+    ring.style.strokeDashoffset = C * (1 - ms / (SECONDS * 1000));
+  }
+  const t = $('#tLeft');
+  if (t) t.textContent = left;
+  const box = $('#timer');
+  if (box) box.classList.toggle('warn', left <= 15);
+  if (ms <= 0) lockCard(true);
+}
+
+function reroll() {
+  const r = curRound();
+  const left = DRAWS_PER_ROUND - r.draws;
+  if (left <= 0 || r.lockedAt) return;
+  r.board = makeBoard();
+  r.draws++;
+  r.code = roundCode(state.cur, r.board, state.nick);
+  save();
+  enterPick();
+  toast(`第 ${state.cur} 局換了第 ${r.draws} 張`);
+}
+
+function lockCard(auto) {
+  const r = curRound();
+  if (!r || r.lockedAt) return;
+  r.lockedAt = auto ? r.startedAt + SECONDS * 1000 : Date.now();
+  r.marks = [];
+  save();
+  stopTick();
+  enterPlay();
+  toast(auto ? `時間到，第 ${state.cur} 局已鎖定` : `第 ${state.cur} 局已鎖盤`);
+}
+
+/* ---------- 對獎 ---------- */
+function enterPlay() {
+  const n = state.cur, r = curRound();
+  show('Play');
+  $('#playNick').textContent = state.nick;
+  $('#playCode').textContent = `第 ${n} 局・卡號 ${r.code}`;
+  $('#playRound').textContent = n;
+  $('#playCommit').textContent = '承諾碼 ' + state.commit;
+  lastLines = 0;
+  paintStrip($('#stripPlay'));
+  const last = n >= ROUNDS;
+  $('#actsNext').classList.toggle('hide', last);
+  $('#actsLast').classList.toggle('hide', !last);
+  $('#btnNext').innerHTML = n >= ROUNDS ? '已達上限' : `下一局<small>第 ${n + 1} 局</small>`;
+  $('#playHint').innerHTML = last
+    ? '這一局是最後一局。卡號請留著，對獎時要核對。'
+    : '點錯再點一次可以取消。這一局的卡號請留著，對獎時要核對。';
+  paintPlay();
+}
+
 function renderGrid(el, board, marks, hits, interactive) {
   const marked = new Set(marks);
   const hitSet = new Set(hits);
   el.innerHTML = board.map(n => {
-    const on = marked.has(n);
-    const hit = hitSet.has(n);
+    const on = marked.has(n), hit = hitSet.has(n);
     return `<button class="cell${on ? ' marked' : ''}${hit ? ' hit' : ''}" data-n="${n}" ${interactive ? '' : 'tabindex="-1"'}>
       <span class="daub"></span><span class="v">${n}</span>
     </button>`;
   }).join('');
 }
 
-function computeLines() {
-  const marked = new Set(state.marks);
+function computeLines(marks, board) {
+  const marked = new Set(marks);
   const hit = new Set();
   let n = 0;
   LINES.forEach(line => {
-    if (line.every(i => marked.has(state.board[i]))) {
-      n++;
-      line.forEach(i => hit.add(state.board[i]));
-    }
+    if (line.every(i => marked.has(board[i]))) { n++; line.forEach(i => hit.add(board[i])); }
   });
   return { count: n, cells: [...hit] };
 }
 
-/* ---------- pick ---------- */
-function enterPick() {
-  show('Pick');
-  $('#pickNick').textContent = state.nick;
-  $('#pickCode').textContent = '卡號 ' + state.code;
-  $('#stubNick').textContent = state.nick;
-  const left = TOTAL_DRAWS - state.draws;
-  $('#pickDrawLabel').textContent = `第 ${state.draws} 張 / 共 ${TOTAL_DRAWS} 次`;
-  $('#stubDraw').innerHTML = `${state.draws} <small>/ ${TOTAL_DRAWS} 張</small>`;
-  $('#rollSub').textContent = left ? `剩 ${left} 次` : '已用完';
-  $('#btnRoll').disabled = left <= 0;
-  renderGrid($('#gridPick'), state.board, [], [], false);
-  startTimer();
-}
-
-function startTimer() {
-  stopTick();
-  tick = setInterval(updateTimer, 200);
-  updateTimer();
-}
-function stopTick() { if (tick) { clearInterval(tick); tick = null; } }
-
-function remainingMs() {
-  return Math.max(0, SECONDS * 1000 - (Date.now() - state.startedAt));
-}
-function updateTimer() {
-  if (!state || state.lockedAt) { stopTick(); return; }
-  const ms = remainingMs();
-  const left = Math.ceil(ms / 1000);
-  const frac = ms / (SECONDS * 1000);
-  const C = 2 * Math.PI * 26;
-  const ring = $('#ring');
-  ring.style.strokeDasharray = C;
-  ring.style.strokeDashoffset = C * (1 - frac);
-  $('#tLeft').textContent = left;
-  $('#timer').classList.toggle('warn', left <= 15);
-  if (ms <= 0) lockCard(true);
-}
-
-function reroll() {
-  const left = TOTAL_DRAWS - state.draws;
-  if (left <= 0) return;
-  state.board = makeBoard();
-  state.draws++;
-  state.code = cardCode(state.nick, state.board);
-  save();
-  enterPick();
-  toast(`換了第 ${state.draws} 張`);
-}
-
-function lockCard(auto) {
-  if (state.lockedAt) return;
-  const now = Date.now();
-  state.lockedAt = auto ? state.startedAt + SECONDS * 1000 : now;
-  state.marks = [];
-  save();
-  stopTick();
-  enterPlay();
-  toast(auto ? '時間到，已鎖定這張卡' : '已鎖盤，開始對獎');
-}
-
-/* ---------- play ---------- */
-function enterPlay() {
-  show('Play');
-  $('#playNick').textContent = state.nick;
-  $('#playCode').textContent = '卡號 ' + state.code;
-  lastLines = 0;
-  paintPlay();
-}
-
 function paintPlay() {
-  const { count, cells } = computeLines();
-  renderGrid($('#gridPlay'), state.board, state.marks, cells, true);
-  $('#stubMarked').innerHTML = `${state.marks.length} <small>/ 25</small>`;
+  const r = curRound();
+  const { count, cells } = computeLines(r.marks, r.board);
+  renderGrid($('#gridPlay'), r.board, r.marks, cells, true);
+  $('#stubMarked').innerHTML = `${r.marks.length} <small>/ 25</small>`;
   $('#stubLines').innerHTML = `${count} <small>條</small>`;
   $('#bigLines').innerHTML = `${count}<em>條</em>`;
-  $('#bigMarked').innerHTML = `${state.marks.length}<em>格</em>`;
+  $('#bigMarked').innerHTML = `${r.marks.length}<em>格</em>`;
   $('#cardLines').classList.toggle('on', count > 0);
   if (count > lastLines) {
     const f = $('#flash');
@@ -524,65 +628,99 @@ function paintPlay() {
 }
 
 function toggleMark(n) {
-  const i = state.marks.indexOf(n);
-  if (i >= 0) state.marks.splice(i, 1);
-  else state.marks.push(n);
+  const r = curRound();
+  const i = r.marks.indexOf(n);
+  if (i >= 0) r.marks.splice(i, 1); else r.marks.push(n);
   save();
   paintPlay();
 }
 
-/* ---------- boot ---------- */
+function nextRound() {
+  const n = state.cur;
+  if (!rd(n) || !rd(n).lockedAt) { toast('這一局還沒鎖盤'); return; }
+  if (n >= ROUNDS) { toast('已達局數上限'); return; }
+  openRound(n + 1);
+  toast(`第 ${n + 1} 局開始，60 秒內可換盤`);
+}
+
+/* ---------- 啟動 ---------- */
 function boot() {
   state = load();
   $('#verChip').textContent = 'v' + window.APP_VERSION;
 
-  if (state && state.lockedAt) { enterPlay(); }
-  else if (state && remainingMs() > 0) { enterPick(); }
-  else if (state) { lockCard(true); }
-  else { show('Intro'); }
+  const hist = histList();
+  if (hist.length) {
+    const w = $('#histWarn');
+    w.classList.remove('hide');
+    w.innerHTML = `<b>這台裝置已領過 ${hist.length} 張卡。</b><br>主辦可以用承諾碼核對。若這一輪是同一場活動，請直接沿用原本那張卡，不要重領。`;
+  }
+
+  if (state) {
+    const r = curRound();
+    if (r && r.lockedAt) enterPlay();
+    else if (r && remainingMs() > 0) enterPick();
+    else if (r) lockCard(true);
+    else openRound(1);
+  } else {
+    show('Intro');
+  }
 
   $('#btnStart').onclick = () => {
     const nick = $('#nick').value.trim();
     if (!nick) { $('#nick').focus(); toast('先填一個暱稱'); return; }
+    if (histList().length && !confirm('這台裝置已經領過卡。\n重領會拿到另一組全新的盤，主辦可能因此無法核對。\n\n確定要重領？')) return;
+    const boards = Array.from({ length: ROUNDS }, () => makeBoard());
+    const createdAt = Date.now();
     state = {
       nick: nick.slice(0, 12),
-      board: makeBoard(),
-      code: '',
-      draws: 1,
-      startedAt: Date.now(),
-      lockedAt: null,
-      marks: []
+      createdAt,
+      boards,
+      commit: hash36([nick.slice(0, 12), String(createdAt), boards.map(b => b.join('.')).join('|')].join('::')),
+      rounds: {},
+      cur: 1
     };
-    state.code = cardCode(state.nick, state.board);
-    save();
-    enterPick();
+    histAdd({ nick: state.nick, commit: state.commit, at: createdAt });
+    openRound(1);
   };
   $('#nick').addEventListener('keydown', e => { if (e.key === 'Enter') $('#btnStart').click(); });
+
   $('#btnRoll').onclick = reroll;
   $('#btnLock').onclick = () => lockCard(false);
+  $('#btnNext').onclick = nextRound;
 
   $('#gridPlay').addEventListener('click', e => {
     const c = e.target.closest('.cell');
     if (!c) return;
     toggleMark(Number(c.dataset.n));
   });
-  $('#btnClear').onclick = () => {
-    if (!state.marks.length) return;
-    if (!confirm('清除所有已蓋的章？')) return;
-    state.marks = [];
-    save();
-    paintPlay();
+
+  const clearMarks = () => {
+    const r = curRound();
+    if (!r || !r.marks.length) return;
+    if (!confirm('清除這一局所有已蓋的章？')) return;
+    r.marks = []; save(); paintPlay();
   };
-  $('#btnReset').onclick = () => {
-    if (!confirm('重新開始會清掉這張卡，確定嗎？')) return;
+  $('#btnClear').onclick = clearMarks;
+  $('#btnClear2').onclick = clearMarks;
+
+  const reissue = () => {
+    if (!confirm('放棄重領新卡？\n\n• 目前這一局的盤與卡號會作廢\n• 會拿到全新的局數序列\n• 主辦可能無法核對\n\n確定要重領？')) return;
     localStorage.removeItem(KEY);
     state = null;
     stopTick();
-    $('#nick').value = '';
     show('Intro');
+    $('#nick').value = '';
+    const hist = histList();
+    if (hist.length) {
+      const w = $('#histWarn');
+      w.classList.remove('hide');
+      w.innerHTML = `<b>這台裝置已領過 ${hist.length} 張卡。</b><br>主辦可以用承諾碼核對。若這一輪是同一場活動，請直接沿用原本那張卡，不要重領。`;
+    }
   };
+  $('#btnReissue').onclick = reissue;
+
   $('#verChip').onclick = async () => {
-    if (!confirm('重新載入並清除快取？\n（這張卡不會消失）')) return;
+    if (!confirm('重新載入並清除快取？\n（卡片與局數不會消失）')) return;
     try {
       const rs = await navigator.serviceWorker.getRegistrations();
       await Promise.all(rs.map(r => r.unregister()));
@@ -594,9 +732,10 @@ function boot() {
   if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
 
   window.__bingo = {
-    state: () => state,
-    show, enterPick, enterPlay, lockCard, reroll, toggleMark, makeBoard, computeLines,
-    setState: s => { state = s; save(); }
+    state: () => state, show, enterPick, enterPlay, lockCard, reroll, toggleMark,
+    makeBoard, computeLines, openRound, nextRound, rd,
+    setState: s => { state = s; save(); },
+    hist: histList
   };
 }
 document.addEventListener('DOMContentLoaded', boot);
